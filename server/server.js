@@ -1,31 +1,29 @@
 const express = require('express');
+const mongoose = require('mongoose');
+const cookieSession = require('cookie-session');
 const passport = require('passport');
-const googleStrategy = require('passport-google-oauth20').Strategy;
 const keys = require('./config/keys');
+
+require('./models/User');
+require('./services/passport');
+
+mongoose.connect(keys.mongoURI);
 
 const app = express();
 
-passport.use(new googleStrategy({
-    clientID: keys.googleClientID,
-    clientSecret: keys.googleClientSecret,
-    callbackURL: 'google/callback' // where user is sent after they grant the app permission
-    }, (accessToken, refreshToken, profile, done) => {
-        // accessToken proves that we have the user's permission to access their profile
-        // refreshToken allows us to refresh the user's access token
-        console.log('access token', accessToken);
-        console.log('refresh token', refreshToken);
-        console.log('profile:', profile);
+// extracts cookie data
+app.use(
+    cookieSession({
+        // 30 days
+        maxAge: 30 * 24 * 60 * 60 * 1000,  // has to be passed in milliseconds
+        keys: [keys.cookieKey]
     })
 );
 
-// when user hits this route they will be sent to passport authentication flow
-app.get('/auth/google', passport.authenticate('google', {
-    // what infomation we want to pull from the user's profile
-    scope: ['profile', 'email']
-}));
+app.use(passport.initialize());
+app.use(passport.session());
 
-// the returned url has the code from google in it now
-app.get('/auth/google/callback', passport.authenticate('google'));
+require('./routes/authRoutes')(app);
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT);
