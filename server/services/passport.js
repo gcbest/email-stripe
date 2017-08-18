@@ -19,7 +19,8 @@ passport.deserializeUser((id, done) => { // user's id is what was passed into th
 passport.use(new googleStrategy({
         clientID: keys.googleClientID,
         clientSecret: keys.googleClientSecret,
-        callbackURL: '/auth/google/callback' // where user is sent after they grant the app permission
+        callbackURL: '/auth/google/callback', // where user is sent after they grant the app permission
+        proxy: true // to allow the callback to go thru the heroku proxy
     }, (accessToken, refreshToken, profile, done) => {
         // accessToken proves that we have the user's permission to access their profile
         // refreshToken allows us to refresh the user's access token
