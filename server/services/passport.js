@@ -21,28 +21,24 @@ passport.use(new googleStrategy({
         clientSecret: keys.googleClientSecret,
         callbackURL: '/auth/google/callback', // where user is sent after they grant the app permission
         proxy: true // to allow the callback to go thru the heroku proxy
-    }, (accessToken, refreshToken, profile, done) => {
+    },
+    async (accessToken, refreshToken, profile, done) => {
         // accessToken proves that we have the user's permission to access their profile
         // refreshToken allows us to refresh the user's access token
         // console.log('access token', accessToken);
         // console.log('refresh token', refreshToken);
         // console.log('profile:', profile);
 
-        User.findOne({ googleId: profile.id })
-            .then((existingUser) => {
+        const existingUser = await User.findOne({ googleId: profile.id });
                 if (existingUser) {
                     // record with the ID already exists
                     // call the 'done' callback to tell passport we are ready for it
                     // first arg is error
-                    done(null, existingUser);
-                } else {
-                    // need to create new record
-                    new User({ googleId: profile.id})
-                        .save()
-                        .then(user => done(null, user)) // only want to call done() after user is saved to DB
+                    return done(null, existingUser);
                 }
-            });
-
+                // else we need to create new record
+                const user = await new User({ googleId: profile.id}).save();
+                done(null, user); // only want to call done() after user is saved to DB
     })
 );
 
