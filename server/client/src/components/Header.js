@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 
 // do not have to have state in class based component,
 // can just use it to organize helper functions
-class Header extends React.Component {
+class Header extends Component {
     render() {
         return (
           <nav>
