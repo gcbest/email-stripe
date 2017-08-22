@@ -8,6 +8,9 @@ import reduxThunk from 'redux-thunk';
 
 import App from './components/App';
 import reducers from './reducers';
+// development axios helpers instead of postman since we need login credentials
+import axios from 'axios';
+window.axios = axios;
 
 const store = createStore(reducers, {}, applyMiddleware(reduxThunk));
 
